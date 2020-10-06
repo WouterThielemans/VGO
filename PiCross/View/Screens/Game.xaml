@@ -1,0 +1,159 @@
+﻿<UserControl x:Class="View.Screens.Game"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:View"
+        xmlns:control="clr-namespace:View.Controls"
+        xmlns:converters="clr-namespace:View.Converters"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock" x:Key="textBlockStyle">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="75"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,40,0,0"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="textBlockStyleDone">
+            <Setter Property="FontSize" Value="75"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#6bad7c"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="textBlockConstraintStyle">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="35"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="Foreground" Value="#6bad7c"/>
+        </Style>
+
+        <Style TargetType="StackPanel" x:Key="stackpanelStyle">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Margin" Value="0,0,0,50"/>
+        </Style>
+
+        <Style TargetType="Image" x:Key="imageGIF">
+            <Setter Property="Width" Value="500"/>
+            <Setter Property="Height" Value="250"/>
+        </Style>
+
+        <Style TargetType="control:PiCrossControl" x:Key="piCrossControlStyle">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,75,75"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="buttonStyle">
+            <Setter Property="Template">
+                <!--style for button when hover and onlick-->
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" Background="{TemplateBinding Background}" BorderBrush="#000000" 
+                                BorderThickness="5" CornerRadius="20">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!--Hoover-->
+                            <Trigger Value="True" Property="IsMouseOver">
+                                <Setter Property="Foreground" Value="#f8e793"/>
+                                <Setter Property="Background" Value="#6bad7c"/>
+                            </Trigger>
+                            <!--Pressed-->
+                            <Trigger Value="True" Property="IsPressed">
+                                <Setter Value="#FFFFFF" TargetName="border" Property="BorderBrush"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="75"/>
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+
+        <Style TargetType="Border" x:Key="borderStyle">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="110"/>
+            <Setter Property="Background" Value="#000000"/>
+        </Style>
+
+        <!-- Converters-->
+        <local:SquareConverter Empty="#FFFFFF" Filled="#000000" Unknown="#a6a6a6" x:Key="squareConverter"/>
+        <converters:BooleanConverter True="#6bad7c" False="#FFFFFF" x:Key="booleanConverter" />
+        <converters:BooleanConverter True="{x:Static Visibility.Visible}" False="{x:Static Visibility.Hidden}" x:Key="solvedConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <!--Title-->
+        <TextBlock Style="{StaticResource textBlockStyle}" Text="JUST DO IT" />
+        <!--Puzzle-->
+        <control:PiCrossControl Style="{StaticResource piCrossControlStyle}" x:Name="PicrossControl" 
+                                 Grid="{Binding grid.Value}" ColumnConstraints="{Binding PlayablePuzzle.ColumnConstraints}"  RowConstraints="{Binding PlayablePuzzle.RowConstraints}">
+            <control:PiCrossControl.SquareTemplate>
+                <DataTemplate>
+                    <!--Buttons/rectangels of puzzle-->
+                    <Button Command="{Binding Click}" CommandParameter="{Binding Square}">
+                        <Button.Content>
+                            <Rectangle Width="40" Height="40" Stroke="#6bad7c" Fill="{Binding Contents.Value, Converter={StaticResource squareConverter}}"/>
+                        </Button.Content>
+                    </Button>
+                </DataTemplate>
+            </control:PiCrossControl.SquareTemplate>
+            <!--Number at each row-->
+            <control:PiCrossControl.RowConstraintsTemplate>
+                <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding Values}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Style="{StaticResource textBlockConstraintStyle}" Text="{Binding Value}" Foreground="{Binding IsSatisfied.Value, Converter={StaticResource booleanConverter}}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DataTemplate>
+            </control:PiCrossControl.RowConstraintsTemplate>
+            <!--Number at each column-->
+            <control:PiCrossControl.ColumnConstraintsTemplate>
+                <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding Values}" >
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Style="{StaticResource textBlockConstraintStyle}" Text="{Binding Value}" Foreground="{Binding IsSatisfied.Value, Converter={StaticResource booleanConverter}}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DataTemplate>
+            </control:PiCrossControl.ColumnConstraintsTemplate>
+        </control:PiCrossControl>
+
+        <!--Button to start -->
+        <StackPanel Style="{StaticResource stackpanelStyle}" VerticalAlignment="Bottom" >
+            <Button Style="{StaticResource buttonStyle}" Content="Back to start" Command="{Binding back}"/>
+        </StackPanel>
+
+        <!--Puzzle completed screen + navigation to start and close program-->
+        <Border Style="{StaticResource borderStyle}" Visibility="{Binding IsSolved.Value, Converter={StaticResource solvedConverter}}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource textBlockStyleDone}" Text="Well done!"/>
+                <Button Style="{StaticResource buttonStyle}" x:Name = "backButton" Command="{Binding back}"  Content ="Back to start" />
+                <Button Style="{StaticResource buttonStyle}" x:Name = "quitButton" Command="{Binding quit}" Content ="Quit Game" />
+                <Image Style="{StaticResource imageGIF}" gif:ImageBehavior.AnimatedSource="/Animations/victory.gif" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
